@@ -1,3 +1,13 @@
 "DOTAAbilities"
 {
+  "item_food"
+  {
+    "BaseClass"		"item_enchanted_mango"
+    "ItemShareability"   "ITEM_FULLY_SHAREABLE_STACKING"
+    "ItemInitialCharges" "2"
+    "ItemPermanent"   "0"
+    "AbilityBehavior"		"DOTA_ABILITY_BEHAVIOR_UNIT_TARGET"
+    "AbilityUnitTargetTeam"			"DOTA_UNIT_TARGET_TEAM_FRIENDLY"
+    "AbilityUnitTargetType"			"DOTA_UNIT_TARGET_HERO"
+  }
 }

@@ -6,6 +6,7 @@ end
 
 require("gamesetup")
 require("libraries.timers")
+require("units.chest_script")
 
 local numOfZombies = 0
 
@@ -24,6 +25,7 @@ end
 -- Create the game mode when we activate
 function Activate()
 	GameRules.AddonTemplate = CAddonTemplateGameMode()
+	GameRules.DropTable = LoadKeyValues("scripts/kv/item_drops.kv")
 	GameRules.AddonTemplate:InitGameMode()
 end
 
@@ -32,11 +34,14 @@ function CAddonTemplateGameMode:InitGameMode()
 	GameRules:GetGameModeEntity():SetThink( "OnThink", self, "GlobalThink", 2 )
 	GameSetup:init()
 	ListenToGameEvent( "npc_spawned", Dynamic_Wrap(self, "OnUnitSpawned"), self )
+	ListenToGameEvent('entity_hurt', Dynamic_Wrap(self, 'OnEntityHurt'), self)
 	-- Register as a listener for a game event from script.
-	local spawner = Entities:FindAllByName("zombie_spawner")
+	local spawners = Entities:FindAllByName("zombie_spawner")
 	Timers:CreateTimer(function ()
 		if numOfZombies < 500 then
-			CreateUnitByName("npc_dota_creature_zombie", spawner[1]:GetAbsOrigin() + RandomVector( 2500 ), true, nil, nil, DOTA_TEAM_BADGUYS )
+			for key, spawner in pairs(spawners) do
+				CreateUnitByName("npc_dota_creature_zombie", spawner:GetAbsOrigin() + RandomVector( math.random(1500,2500) ), true, nil, nil, DOTA_TEAM_BADGUYS )
+			end
 		end
 		return 10.0
 	end)
@@ -50,6 +55,15 @@ function CAddonTemplateGameMode:OnUnitSpawned(args)
 		end
 	end
 	-- Turn an entity index integer to an HScript representing that entity's script instance.
+end
+
+function CAddonTemplateGameMode:OnEntityHurt( args )
+	local entH = EntIndexToHScript(args.entindex_killed)
+	if entH ~= nil then
+		if entH:GetUnitLabel() == "chest" then
+			DropItem(entH)
+		end
+	end
 end
 
 -- Evaluate the state of the game
